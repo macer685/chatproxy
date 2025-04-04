@@ -18,7 +18,7 @@ export default {
 
     // Reenvía la respuesta con los headers CORS permitidos
     const modifiedHeaders = new Headers(response.headers);
-    modifiedHeaders.set("Access-Control-Allow-Origin", "*");
+    modifiedHeaders.set("Access-Control-Allow-Origin", "https://macercreative.app.n8n.cloud/webhook/recuperar-chats");
     modifiedHeaders.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     modifiedHeaders.set("Access-Control-Allow-Headers", "Content-Type");
 
