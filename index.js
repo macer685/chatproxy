@@ -1,33 +1,31 @@
 export default {
   async fetch(request) {
-    const urlDestino = 'https://macercreative.app.n8n.cloud/webhook/recuperar-chats';
+    const url = new URL(request.url);
+    const targetUrl = url.searchParams.get("url"); // Obtiene la URL de destino desde la query param
 
-    if (request.method === 'OPTIONS') {
-      // Respuesta para preflight (CORS)
-      return new Response(null, {
-        status: 204,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-        },
-      });
+    if (!targetUrl) {
+      return new Response("Falta la URL de destino", { status: 400 });
     }
 
-    const response = await fetch(urlDestino, {
+    const response = await fetch(targetUrl, {
       method: request.method,
-      headers: request.headers,
-      body: request.method !== 'GET' && request.method !== 'HEAD' ? await request.text() : null,
+      headers: {
+        ...request.headers,
+        "Origin": "*",
+      },
+      body: request.method !== "GET" ? request.body : null,
     });
 
-    const responseBody = await response.text();
+    // Reenvía la respuesta con los headers CORS permitidos
+    const modifiedHeaders = new Headers(response.headers);
+    modifiedHeaders.set("Access-Control-Allow-Origin", "*");
+    modifiedHeaders.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    modifiedHeaders.set("Access-Control-Allow-Headers", "Content-Type");
 
-    return new Response(responseBody, {
+    return new Response(response.body, {
       status: response.status,
-      headers: {
-        'Content-Type': response.headers.get('Content-Type') || 'text/plain',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: modifiedHeaders,
     });
   },
 };
+
